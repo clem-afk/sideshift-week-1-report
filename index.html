@@ -8,7 +8,7 @@
     :root { --ink:#152238; --muted:#667085; --line:#e5e7eb; --surface:#fff; --page:#f6f8fb; --green:#d9f5df; --yellow:#fff3bf; --red:#ffe0df; --gray:#edf1f5; }
     * { box-sizing:border-box; }
     body { margin:0; background:var(--page); color:var(--ink); font:14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    main { max-width:1540px; margin:0 auto; padding:38px 26px 52px; }
+    main { max-width:1800px; margin:0 auto; padding:30px 18px 44px; }
     h1 { margin:0; font-size:29px; letter-spacing:-.035em; }
     .sub { color:var(--muted); margin:5px 0 25px; }
     .notice { background:#fff8df; border:1px solid #f2d88b; border-radius:10px; padding:13px 15px; margin:0 0 22px; color:#5f4b16; }
@@ -19,13 +19,15 @@
     .stat .value { margin-top:4px; font-size:23px; font-weight:750; letter-spacing:-.025em; }
     .legend { display:flex; flex-wrap:wrap; gap:10px; align-items:center; color:var(--muted); margin:0 0 12px; font-size:12px; }
     .swatch { display:inline-block; width:14px; height:14px; border:1px solid rgba(0,0,0,.08); border-radius:3px; vertical-align:-2px; margin-right:4px; }
-    .table-wrap { overflow:auto; border:1px solid var(--line); border-radius:11px; background:var(--surface); }
-    table { border-collapse:collapse; min-width:1250px; width:100%; }
-    th { background:#f8fafc; color:#475467; font-size:11px; letter-spacing:.035em; text-transform:uppercase; text-align:right; white-space:nowrap; padding:12px 10px; border-bottom:1px solid var(--line); }
+    .table-wrap { overflow:visible; border:1px solid var(--line); border-radius:11px; background:var(--surface); }
+    table { border-collapse:collapse; table-layout:fixed; width:100%; }
+    th { background:#f8fafc; color:#475467; font-size:9px; letter-spacing:.03em; line-height:1.15; text-transform:uppercase; text-align:right; white-space:normal; padding:10px 5px; border-bottom:1px solid var(--line); }
     th:first-child, th:nth-child(2), th:nth-child(3), th:last-child { text-align:left; }
-    td { padding:11px 10px; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap; }
+    td { padding:10px 5px; border-bottom:1px solid var(--line); font-size:12px; line-height:1.25; overflow-wrap:anywhere; text-align:right; white-space:normal; }
     td:first-child, td:nth-child(2), td:nth-child(3), td:last-child { text-align:left; }
     tr:last-child td { border-bottom:0; }
+    th:nth-child(1) { width:16%; } th:nth-child(2) { width:7%; } th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6) { width:5%; }
+    th:nth-child(7) { width:9%; } th:nth-child(8) { width:8%; } th:nth-child(9) { width:8%; } th:nth-child(10), th:nth-child(11) { width:7%; } th:nth-child(12) { width:18%; }
     .name { font-weight:700; }
     .muted { color:var(--muted); }
     .pill { display:inline-block; border-radius:999px; padding:3px 8px; font-size:12px; font-weight:700; }
@@ -34,7 +36,17 @@
     .red { background:var(--red); color:#9e2f2b; }
     .pending { background:var(--gray); color:#536174; }
     .foot { color:var(--muted); font-size:12px; margin:18px 1px 0; max-width:1000px; }
-    @media (max-width:760px) { main { padding:24px 15px; } .stats { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:1050px) { main { padding:22px 10px 38px; } th { font-size:8px; padding:8px 3px; } td { font-size:10px; padding:8px 3px; } .pill { padding:2px 5px; font-size:10px; } }
+    @media (max-width:760px) {
+      main { padding:20px 12px; } .stats { grid-template-columns:repeat(2,1fr); }
+      .table-wrap { border:0; background:transparent; }
+      table, tbody, tr, td { display:block; width:100%; }
+      thead { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+      tr { background:var(--surface); border:1px solid var(--line); border-radius:9px; margin:0 0 10px; padding:6px 10px; }
+      td { display:grid; grid-template-columns:minmax(122px,42%) 1fr; gap:8px; padding:6px 0; border-bottom:1px solid #eef1f4; text-align:right; font-size:12px; }
+      td:last-child { border-bottom:0; } td::before { color:var(--muted); content:attr(data-label); font-size:10px; font-weight:700; letter-spacing:.04em; text-align:left; text-transform:uppercase; }
+      td.name { display:block; font-size:14px; text-align:left; } td.name::before { display:none; }
+    }
     @media print { body { background:white; } main { max-width:none; padding:16px; } .notice { break-inside:avoid; } }
   </style>
 </head>
@@ -83,11 +95,14 @@
       ["Clarissa Gutierrez",4,1,1,609,20],["Addison Hearn",13,0,3,443,10]
     ];
     const fmt = new Intl.NumberFormat("en-US");
-    const status = (cpm, score) => cpm <= 3 && score >= 4 ? ["green", "On track"] : cpm > 4.5 && score < 2 ? ["red", "Underperforming — investigate"] : ["yellow", "Watch — CPM above target"];
-    const rows = creators.map(([name, expected, tt, ig, views, engagements]) => {
-      const total = tt + ig, cost = total * 5, cpm = cost / views * 1000, score = (engagements / views) * 100, [colour, label] = status(cpm, score);
-      return `<tr><td class="name">${name}</td><td>${week}</td><td>${expected ?? "—"}</td><td>${tt}</td><td>${ig}</td><td>${total}</td><td>${fmt.format(views)}</td><td>${fmt.format(Math.round(views / total))}</td><td><span class="pill ${score >= 4 ? "green" : score >= 2 ? "yellow" : "red"}">${score.toFixed(2)}%</span></td><td>$${fmt.format(cost)}</td><td>$${cpm.toFixed(2)}</td><td><span class="pill ${colour}">${label}</span></td></tr>`;
-    }).join("");
+    const status = (cpm, score) => cpm <= 3 && score >= 4 ? ["green", "On track", 0] : cpm > 4.5 && score < 2 ? ["red", "Underperforming — investigate", 2] : ["yellow", "Watch — CPM above target", 1];
+    const ranked = creators.map(([name, expected, tt, ig, views, engagements]) => {
+      const total = tt + ig, cost = total * 5, cpm = cost / views * 1000, score = engagements / views * 100, [colour, label, rank] = status(cpm, score);
+      return { name, expected, tt, ig, total, views, cost, cpm, score, colour, label, rank };
+    }).sort((a, b) => a.rank - b.rank || a.cpm - b.cpm || b.score - a.score);
+    const rows = ranked.map(({ name, expected, tt, ig, total, views, cost, cpm, score, colour, label }) =>
+      `<tr><td class="name" data-label="Creator">${name}</td><td data-label="Week">${week}</td><td data-label="Expected posts">${expected ?? "—"}</td><td data-label="Posts TikTok">${tt}</td><td data-label="Posts Instagram">${ig}</td><td data-label="Total posts">${total}</td><td data-label="Total views">${fmt.format(views)}</td><td data-label="Avg. views / post">${fmt.format(Math.round(views / total))}</td><td data-label="Virality score"><span class="pill ${score >= 4 ? "green" : score >= 2 ? "yellow" : "red"}">${score.toFixed(2)}%</span></td><td data-label="Creator cost">$${fmt.format(cost)}</td><td data-label="Creator CPM">$${cpm.toFixed(2)}</td><td data-label="Review status"><span class="pill ${colour}">${label}</span></td></tr>`
+    ).join("");
     document.querySelector("#rows").innerHTML = rows;
   </script>
 </body>
