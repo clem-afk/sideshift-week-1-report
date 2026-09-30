@@ -30,8 +30,8 @@
     tr.cadence-yellow td:first-child { border-left:4px solid #e3b941; }
     tr.cadence-red td:first-child { border-left:4px solid #e2726d; }
     tr.cadence-gray td:first-child { border-left:4px solid #b6c0ce; }
-    th:nth-child(1) { width:16%; } th:nth-child(2) { width:7%; } th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6) { width:5%; }
-    th:nth-child(7) { width:9%; } th:nth-child(8) { width:8%; } th:nth-child(9) { width:8%; } th:nth-child(10), th:nth-child(11) { width:7%; } th:nth-child(12) { width:18%; }
+    th:nth-child(1) { width:17%; } th:nth-child(2) { width:7%; } th:nth-child(3) { width:10%; } th:nth-child(4), th:nth-child(5) { width:6%; }
+    th:nth-child(6) { width:9%; } th:nth-child(7) { width:9%; } th:nth-child(8) { width:8%; } th:nth-child(9), th:nth-child(10) { width:8%; } th:nth-child(11) { width:12%; }
     .name { font-weight:700; }
     .muted { color:var(--muted); }
     .pill { display:inline-block; border-radius:999px; padding:3px 8px; font-size:12px; font-weight:700; }
@@ -87,7 +87,7 @@
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Creator / @username</th><th>Week</th><th>Expected posts</th><th>Posts TikTok</th><th>Posts Instagram</th><th>Total posts</th><th>Total views</th><th>Avg. views / post</th><th>Virality score</th><th>Creator cost ($)</th><th>Creator CPM ($)</th><th>Review status</th></tr>
+          <tr><th>Creator / @username</th><th>Week</th><th>Posts / expected</th><th>Posts TikTok</th><th>Posts Instagram</th><th>Total views</th><th>Avg. views / post</th><th>Virality score</th><th>Creator cost ($)</th><th>Creator CPM ($)</th><th>Review status</th></tr>
         </thead>
         <tbody id="rows"></tbody>
       </table>
@@ -122,7 +122,7 @@
       return { name, expected, tt, ig, total, views, cost, cpm, score, colour, label, rank, cadenceColour, cadenceLabel };
     }).sort((a, b) => a.rank - b.rank || a.cpm - b.cpm || b.score - a.score);
     const rows = ranked.map(({ name, expected, tt, ig, total, views, cost, cpm, score, colour, label, cadenceColour, cadenceLabel }) =>
-      `<tr class="cadence-${cadenceColour}"><td class="name" data-label="Creator">${name}</td><td data-label="Week">${week}</td><td data-label="Expected posts">${expected ?? "—"}<span class="pace ${cadenceColour}">${cadenceLabel}</span></td><td data-label="Posts TikTok">${tt}</td><td data-label="Posts Instagram">${ig}</td><td data-label="Total posts">${total}</td><td data-label="Total views">${fmt.format(views)}</td><td data-label="Avg. views / post">${fmt.format(Math.round(views / total))}</td><td data-label="Virality score"><span class="pill ${score >= 4 ? "green" : score >= 2 ? "yellow" : "red"}">${score.toFixed(2)}%</span></td><td data-label="Creator cost">$${fmt.format(cost)}</td><td data-label="Creator CPM">$${cpm.toFixed(2)}</td><td data-label="Review status"><span class="pill ${colour}">${label}</span></td></tr>`
+      `<tr class="cadence-${cadenceColour}"><td class="name" data-label="Creator">${name}</td><td data-label="Week">${week}</td><td data-label="Posts / expected"><strong>${total} / ${expected ?? "—"}</strong><span class="pace ${cadenceColour}">${cadenceLabel}</span></td><td data-label="Posts TikTok">${tt}</td><td data-label="Posts Instagram">${ig}</td><td data-label="Total views">${fmt.format(views)}</td><td data-label="Avg. views / post">${fmt.format(Math.round(views / total))}</td><td data-label="Virality score"><span class="pill ${score >= 4 ? "green" : score >= 2 ? "yellow" : "red"}">${score.toFixed(2)}%</span></td><td data-label="Creator cost">$${fmt.format(cost)}</td><td data-label="Creator CPM">$${cpm.toFixed(2)}</td><td data-label="Review status"><span class="pill ${colour}">${label}</span></td></tr>`
     ).join("");
     document.querySelector("#rows").innerHTML = rows;
   </script>
