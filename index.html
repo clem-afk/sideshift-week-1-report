@@ -26,14 +26,23 @@
     td { padding:10px 5px; border-bottom:1px solid var(--line); font-size:12px; line-height:1.25; overflow-wrap:anywhere; text-align:right; white-space:normal; }
     td:first-child, td:nth-child(2), td:nth-child(3), td:last-child { text-align:left; }
     tr:last-child td { border-bottom:0; }
+    tr.cadence-green td:first-child { border-left:4px solid #58b976; }
+    tr.cadence-yellow td:first-child { border-left:4px solid #e3b941; }
+    tr.cadence-red td:first-child { border-left:4px solid #e2726d; }
+    tr.cadence-gray td:first-child { border-left:4px solid #b6c0ce; }
     th:nth-child(1) { width:16%; } th:nth-child(2) { width:7%; } th:nth-child(3), th:nth-child(4), th:nth-child(5), th:nth-child(6) { width:5%; }
     th:nth-child(7) { width:9%; } th:nth-child(8) { width:8%; } th:nth-child(9) { width:8%; } th:nth-child(10), th:nth-child(11) { width:7%; } th:nth-child(12) { width:18%; }
     .name { font-weight:700; }
     .muted { color:var(--muted); }
     .pill { display:inline-block; border-radius:999px; padding:3px 8px; font-size:12px; font-weight:700; }
+    .pace { display:block; margin-top:3px; font-size:10px; font-weight:700; }
     .green { background:var(--green); color:#1e6835; }
     .yellow { background:var(--yellow); color:#755a00; }
     .red { background:var(--red); color:#9e2f2b; }
+    .pace.green { background:transparent; color:#287841; }
+    .pace.yellow { background:transparent; color:#9a7200; }
+    .pace.red { background:transparent; color:#b53d37; }
+    .pace.gray { background:transparent; color:#667085; }
     .pending { background:var(--gray); color:#536174; }
     .foot { color:var(--muted); font-size:12px; margin:18px 1px 0; max-width:1000px; }
     @media (max-width:1050px) { main { padding:22px 10px 38px; } th { font-size:8px; padding:8px 3px; } td { font-size:10px; padding:8px 3px; } .pill { padding:2px 5px; font-size:10px; } }
@@ -69,6 +78,12 @@
       <span><span class="swatch" style="background:var(--red)"></span>Red: CPM &gt; $4.50 and virality &lt; 2%</span>
       <span>A red creator becomes an exit candidate only after persistent underperformance following corrections.</span>
     </div>
+    <div class="legend">
+      <span>Post cadence:</span>
+      <span><span class="swatch" style="background:#58b976"></span>target met</span>
+      <span><span class="swatch" style="background:#e3b941"></span>up to 15% behind</span>
+      <span><span class="swatch" style="background:#e2726d"></span>more than 15% behind</span>
+    </div>
     <div class="table-wrap">
       <table>
         <thead>
@@ -96,12 +111,18 @@
     ];
     const fmt = new Intl.NumberFormat("en-US");
     const status = (cpm, score) => cpm <= 3 && score >= 4 ? ["green", "On track", 0] : cpm > 4.5 && score < 2 ? ["red", "Underperforming — investigate", 2] : ["yellow", "Watch — CPM above target", 1];
+    const cadence = (total, expected) => {
+      if (!expected) return ["gray", "Target unavailable"];
+      const rate = total / expected * 100;
+      return rate >= 100 ? ["green", `${Math.round(rate)}% on pace`] : rate >= 85 ? ["yellow", `${Math.round(rate)}% pace`] : ["red", `${Math.round(rate)}% pace`];
+    };
     const ranked = creators.map(([name, expected, tt, ig, views, engagements]) => {
       const total = tt + ig, cost = total * 5, cpm = cost / views * 1000, score = engagements / views * 100, [colour, label, rank] = status(cpm, score);
-      return { name, expected, tt, ig, total, views, cost, cpm, score, colour, label, rank };
+      const [cadenceColour, cadenceLabel] = cadence(total, expected);
+      return { name, expected, tt, ig, total, views, cost, cpm, score, colour, label, rank, cadenceColour, cadenceLabel };
     }).sort((a, b) => a.rank - b.rank || a.cpm - b.cpm || b.score - a.score);
-    const rows = ranked.map(({ name, expected, tt, ig, total, views, cost, cpm, score, colour, label }) =>
-      `<tr><td class="name" data-label="Creator">${name}</td><td data-label="Week">${week}</td><td data-label="Expected posts">${expected ?? "—"}</td><td data-label="Posts TikTok">${tt}</td><td data-label="Posts Instagram">${ig}</td><td data-label="Total posts">${total}</td><td data-label="Total views">${fmt.format(views)}</td><td data-label="Avg. views / post">${fmt.format(Math.round(views / total))}</td><td data-label="Virality score"><span class="pill ${score >= 4 ? "green" : score >= 2 ? "yellow" : "red"}">${score.toFixed(2)}%</span></td><td data-label="Creator cost">$${fmt.format(cost)}</td><td data-label="Creator CPM">$${cpm.toFixed(2)}</td><td data-label="Review status"><span class="pill ${colour}">${label}</span></td></tr>`
+    const rows = ranked.map(({ name, expected, tt, ig, total, views, cost, cpm, score, colour, label, cadenceColour, cadenceLabel }) =>
+      `<tr class="cadence-${cadenceColour}"><td class="name" data-label="Creator">${name}</td><td data-label="Week">${week}</td><td data-label="Expected posts">${expected ?? "—"}<span class="pace ${cadenceColour}">${cadenceLabel}</span></td><td data-label="Posts TikTok">${tt}</td><td data-label="Posts Instagram">${ig}</td><td data-label="Total posts">${total}</td><td data-label="Total views">${fmt.format(views)}</td><td data-label="Avg. views / post">${fmt.format(Math.round(views / total))}</td><td data-label="Virality score"><span class="pill ${score >= 4 ? "green" : score >= 2 ? "yellow" : "red"}">${score.toFixed(2)}%</span></td><td data-label="Creator cost">$${fmt.format(cost)}</td><td data-label="Creator CPM">$${cpm.toFixed(2)}</td><td data-label="Review status"><span class="pill ${colour}">${label}</span></td></tr>`
     ).join("");
     document.querySelector("#rows").innerHTML = rows;
   </script>
