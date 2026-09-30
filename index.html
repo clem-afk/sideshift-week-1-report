@@ -41,9 +41,9 @@
 <body>
   <main>
     <h1>SideShift — creator performance</h1>
-    <p class="sub">Week 1 · 21 Sep 2026 → 28 Sep 2026 · preliminary operational view</p>
+    <p class="sub">Week 1 · 21 Sep 2026 → 28 Sep 2026 · dashboard-based operational view</p>
     <div class="notice">
-      <strong>Important:</strong> creator rows below come from the existing Week 1 post-snapshot sheet. It reports post-level views and engagement, not the accrued creator cost model. The official campaign dashboard currently shows <strong>99.3k retained views</strong> and <strong>$18.99 CPM</strong> for the completed week; per-creator Cost and CPM must remain pending until the accrued-cost query is connected.
+      <strong>Cost method:</strong> all creators use the same $600 / 120-post monthly model, so this report applies <strong>$5 per delivered post</strong>. No Week 1 video reached 100k views, therefore no view bonus is included. Likes, comments and shares are aggregated into the virality score from the Internet People reporting data.
     </div>
     <section class="stats" aria-label="Week summary">
       <div class="stat"><div class="label">Creators with posts</div><div class="value" id="creators">22</div></div>
@@ -52,10 +52,10 @@
       <div class="stat"><div class="label">Virality score</div><div class="value" id="virality">5.98%</div></div>
     </section>
     <div class="legend">
-      <span><span class="swatch" style="background:var(--green)"></span>Green: virality ≥ 4%</span>
-      <span><span class="swatch" style="background:var(--yellow)"></span>Yellow: virality 2–4%</span>
-      <span><span class="swatch" style="background:var(--red)"></span>Red: virality &lt; 2%</span>
-      <span>Final on-track / watch / exit status requires verified CPM + persistence.</span>
+      <span><span class="swatch" style="background:var(--green)"></span>Green: CPM ≤ $3 and virality ≥ 4%</span>
+      <span><span class="swatch" style="background:var(--yellow)"></span>Yellow: monitor / improve</span>
+      <span><span class="swatch" style="background:var(--red)"></span>Red: CPM &gt; $4.50 and virality &lt; 2%</span>
+      <span>A red creator becomes an exit candidate only after persistent underperformance following corrections.</span>
     </div>
     <div class="table-wrap">
       <table>
@@ -65,28 +65,28 @@
         <tbody id="rows"></tbody>
       </table>
     </div>
-    <p class="foot">Scope: 22 creators with at least one post in the Week 1 source. The campaign dashboard currently reports 29 active creators, so creators without a matched Week 1 post row are not silently shown as zero. “Expected posts”, creator cost, creator CPM, and the final status are intentionally pending rather than estimated. Snapshot total: 115,313 views / 6,891 engagements. Official retained views use a different time-based metric, hence the 99.3k dashboard figure.</p>
+    <p class="foot">Scope: 22 creators with at least one post in the Week 1 source. Expected posts are taken from the campaign dashboard's Week 1 target for each current membership; Isadora Bodo no longer has a current membership record, so her historical target is shown as unavailable. Snapshot total: 115,313 views / 6,891 engagements. These are post snapshots; the dashboard's retained-views figure uses a different time-based methodology.</p>
   </main>
   <script>
     const week = "21 Sep – 28 Sep";
     const creators = [
-      ["Emma Paola Quijas Velazquez",12,12,12512,1311],["Daniela Pereira",15,12,11753,663],
-      ["Kailey Wilgus",19,15,9456,839],["Kaeleigh Dowdy",15,15,8926,645],
-      ["Nuri Nuriaga",15,13,8783,326],["Madison Sit",11,11,8093,519],
-      ["Baylee Perceful",11,8,8076,432],["Emma Provenzano",16,15,7003,300],
-      ["Ashleigh Phifer",13,13,6999,189],["Fernanda Zibel",5,5,5604,58],
-      ["Daniela Amezcua",4,4,5538,659],["Julia Severino",15,13,4510,142],
-      ["Batuhan Ünver",10,9,3260,124],["Trina Grawl",10,10,3157,256],
-      ["Desiree Olinghouse",15,12,2570,67],["Vania Cabuto",6,6,2013,58],
-      ["Isadora Bodo",2,3,1832,79],["Sjoukje Degraeve",5,8,1515,46],
-      ["Elizabeth Lozano Ochoa",4,4,1343,51],["Brielle Iannaco",3,3,1318,97],
-      ["Clarissa Gutierrez",1,1,609,20],["Addison Hearn",0,3,443,10]
+      ["Emma Paola Quijas Velazquez",26,12,12,12512,1311],["Daniela Pereira",30,15,12,11753,663],
+      ["Kailey Wilgus",26,19,15,9456,839],["Kaeleigh Dowdy",30,15,15,8926,645],
+      ["Nuri Nuriaga",30,15,13,8783,326],["Madison Sit",21,11,11,8093,519],
+      ["Baylee Perceful",21,11,8,8076,432],["Emma Provenzano",30,16,15,7003,300],
+      ["Ashleigh Phifer",26,13,13,6999,189],["Fernanda Zibel",13,5,5,5604,58],
+      ["Daniela Amezcua",4,4,4,5538,659],["Julia Severino",26,15,13,4510,142],
+      ["Batuhan Ünver",30,10,9,3260,124],["Trina Grawl",26,10,10,3157,256],
+      ["Desiree Olinghouse",26,15,12,2570,67],["Vania Cabuto",13,6,6,2013,58],
+      ["Isadora Bodo",null,2,3,1832,79],["Sjoukje Degraeve",26,5,8,1515,46],
+      ["Elizabeth Lozano Ochoa",9,4,4,1343,51],["Brielle Iannaco",17,3,3,1318,97],
+      ["Clarissa Gutierrez",4,1,1,609,20],["Addison Hearn",13,0,3,443,10]
     ];
     const fmt = new Intl.NumberFormat("en-US");
-    const status = score => score >= 4 ? ["green", "Good virality"] : score >= 2 ? ["yellow", "Improve"] : ["red", "Investigate"];
-    const rows = creators.map(([name, tt, ig, views, engagements]) => {
-      const total = tt + ig, score = (engagements / views) * 100, [colour, label] = status(score);
-      return `<tr><td class="name">${name}</td><td>${week}</td><td class="muted">Pending</td><td>${tt}</td><td>${ig}</td><td>${total}</td><td>${fmt.format(views)}</td><td>${fmt.format(Math.round(views / total))}</td><td><span class="pill ${colour}">${score.toFixed(2)}%</span></td><td class="muted">Pending</td><td class="muted">Pending</td><td><span class="pill pending">Cost validation pending</span></td></tr>`;
+    const status = (cpm, score) => cpm <= 3 && score >= 4 ? ["green", "On track"] : cpm > 4.5 && score < 2 ? ["red", "Underperforming — investigate"] : ["yellow", "Watch — CPM above target"];
+    const rows = creators.map(([name, expected, tt, ig, views, engagements]) => {
+      const total = tt + ig, cost = total * 5, cpm = cost / views * 1000, score = (engagements / views) * 100, [colour, label] = status(cpm, score);
+      return `<tr><td class="name">${name}</td><td>${week}</td><td>${expected ?? "—"}</td><td>${tt}</td><td>${ig}</td><td>${total}</td><td>${fmt.format(views)}</td><td>${fmt.format(Math.round(views / total))}</td><td><span class="pill ${score >= 4 ? "green" : score >= 2 ? "yellow" : "red"}">${score.toFixed(2)}%</span></td><td>$${fmt.format(cost)}</td><td>$${cpm.toFixed(2)}</td><td><span class="pill ${colour}">${label}</span></td></tr>`;
     }).join("");
     document.querySelector("#rows").innerHTML = rows;
   </script>
