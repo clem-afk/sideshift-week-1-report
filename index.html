@@ -92,22 +92,24 @@
         <tbody id="rows"></tbody>
       </table>
     </div>
-    <p class="foot">Scope: 22 creators with at least one post in the Week 1 source. Expected posts are taken from the campaign dashboard's Week 1 target for each current membership; Isadora Bodo no longer has a current membership record, so her historical target is shown as unavailable. Snapshot total: 115,313 views / 6,891 engagements. These are post snapshots; the dashboard's retained-views figure uses a different time-based methodology.</p>
+    <p class="foot">Scope: 22 creators with at least one post in the Week 1 source. Expected posts are calculated from each creator's first SideShift post date: active days in Sep 21–27 × 30 posts/week, rounded. A creator who started before Sep 21 has the full weekly target. Snapshot total: 115,313 views / 6,891 engagements. These are post snapshots; the dashboard's retained-views figure uses a different time-based methodology.</p>
   </main>
   <script>
     const week = "Week 1";
+    const reportStartDay = 21, reportEndDayExclusive = 28, weeklyPostTarget = 30;
+    // [creator, first SideShift post day in September, TikTok posts, Instagram posts, views, engagements]
     const creators = [
-      ["Emma Paola Quijas Velazquez",26,12,12,12512,1311],["Daniela Pereira",30,15,12,11753,663],
-      ["Kailey Wilgus",26,19,15,9456,839],["Kaeleigh Dowdy",30,15,15,8926,645],
-      ["Nuri Nuriaga",30,15,13,8783,326],["Madison Sit",21,11,11,8093,519],
-      ["Baylee Perceful",21,11,8,8076,432],["Emma Provenzano",30,16,15,7003,300],
-      ["Ashleigh Phifer",26,13,13,6999,189],["Fernanda Zibel",13,5,5,5604,58],
-      ["Daniela Amezcua",4,4,4,5538,659],["Julia Severino",26,15,13,4510,142],
-      ["Batuhan Ünver",30,10,9,3260,124],["Trina Grawl",26,10,10,3157,256],
-      ["Desiree Olinghouse",26,15,12,2570,67],["Vania Cabuto",13,6,6,2013,58],
-      ["Isadora Bodo",null,2,3,1832,79],["Sjoukje Degraeve",26,5,8,1515,46],
-      ["Elizabeth Lozano Ochoa",9,4,4,1343,51],["Brielle Iannaco",17,3,3,1318,97],
-      ["Clarissa Gutierrez",4,1,1,609,20],["Addison Hearn",13,0,3,443,10]
+      ["Emma Paola Quijas Velazquez",22,12,12,12512,1311],["Daniela Pereira",21,15,12,11753,663],
+      ["Kailey Wilgus",22,19,15,9456,839],["Kaeleigh Dowdy",21,15,15,8926,645],
+      ["Nuri Nuriaga",21,15,13,8783,326],["Madison Sit",23,11,11,8093,519],
+      ["Baylee Perceful",23,11,8,8076,432],["Emma Provenzano",21,16,15,7003,300],
+      ["Ashleigh Phifer",22,13,13,6999,189],["Fernanda Zibel",25,5,5,5604,58],
+      ["Daniela Amezcua",27,4,4,5538,659],["Julia Severino",22,15,13,4510,142],
+      ["Batuhan Ünver",21,10,9,3260,124],["Trina Grawl",22,10,10,3157,256],
+      ["Desiree Olinghouse",22,15,12,2570,67],["Vania Cabuto",25,6,6,2013,58],
+      ["Isadora Bodo",17,2,3,1832,79],["Sjoukje Degraeve",22,5,8,1515,46],
+      ["Elizabeth Lozano Ochoa",26,4,4,1343,51],["Brielle Iannaco",24,3,3,1318,97],
+      ["Clarissa Gutierrez",27,1,1,609,20],["Addison Hearn",25,0,3,443,10]
     ];
     const fmt = new Intl.NumberFormat("en-US");
     const status = (cpm, score) => cpm <= 3 && score >= 4 ? ["green", "On track", 0] : cpm > 4.5 && score < 2 ? ["red", "Underperforming — investigate", 2] : ["yellow", "Watch — CPM above target", 1];
@@ -116,7 +118,9 @@
       const rate = total / expected * 100;
       return rate >= 100 ? ["green", `${Math.round(rate)}% on pace`] : rate >= 85 ? ["yellow", `${Math.round(rate)}% pace`] : ["red", `${Math.round(rate)}% pace`];
     };
-    const ranked = creators.map(([name, expected, tt, ig, views, engagements]) => {
+    const expectedPosts = firstPostDay => Math.round((reportEndDayExclusive - Math.max(firstPostDay, reportStartDay)) * weeklyPostTarget / 7);
+    const ranked = creators.map(([name, firstPostDay, tt, ig, views, engagements]) => {
+      const expected = expectedPosts(firstPostDay);
       const total = tt + ig, cost = total * 5, cpm = cost / views * 1000, score = engagements / views * 100, [colour, label, rank] = status(cpm, score);
       const [cadenceColour, cadenceLabel] = cadence(total, expected);
       return { name, expected, tt, ig, total, views, cost, cpm, score, colour, label, rank, cadenceColour, cadenceLabel };
